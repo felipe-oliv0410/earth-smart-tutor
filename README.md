@@ -1,14 +1,18 @@
-# Welcome to your Lovable project
+# Clima Tutor AI
+
+Gostaria de criar uma aplicação web que comunique com um tutor de IA para ensinar Alunos do Ensino médio sobre educação climática
 
 This project was built with [Lovable](https://lovable.dev).
 
+**Live app**: https://earth-smart-tutor.lovable.app
+
 ## Build with Lovable
 
-Open your project in the [Lovable editor](https://lovable.dev) and keep building.
+Continue developing this project in the [Lovable editor](https://lovable.dev/projects/008107b6-6a62-4d2f-b790-974c40371b65).
 
 - **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: connect the project to GitHub and every change made in Lovable is committed straight to your repository.
-- **Full ownership**: this code is yours. Push to your repository and your changes sync back into Lovable, ready for your next prompt.
+- **Stay in sync**: every change made in Lovable is committed straight to this repository.
+- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
 
 ## Development
 
@@ -20,10 +24,3 @@ cd <repository-name>
 npm i
 npm run dev
 ```
-
-## Built with
-
-- TanStack Start
-- TypeScript
-- React
-- Tailwind CSS

@@ -1,24 +1,215 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useChat } from "@ai-sdk/react";
+import { DefaultChatTransport } from "ai";
+import { useMemo, useState } from "react";
+import { Brain, RotateCcw, Sprout } from "lucide-react";
+import {
+  Conversation,
+  ConversationContent,
+  ConversationEmptyState,
+  ConversationScrollButton,
+} from "@/components/ai-elements/conversation";
+import {
+  Message,
+  MessageContent,
+  MessageResponse,
+} from "@/components/ai-elements/message";
+import {
+  PromptInput,
+  PromptInputFooter,
+  PromptInputSubmit,
+  PromptInputTextarea,
+} from "@/components/ai-elements/prompt-input";
+import { Shimmer } from "@/components/ai-elements/shimmer";
+import logo from "@/assets/logo.png";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "ClimaTutor — Tutor de IA sobre Educação Climática" },
+      {
+        name: "description",
+        content:
+          "Converse com o ClimaTutor, um tutor de IA que ensina mudanças climáticas, sustentabilidade e soluções para estudantes do ensino médio.",
+      },
+      { property: "og:title", content: "ClimaTutor — Tutor de IA sobre Educação Climática" },
+      {
+        property: "og:description",
+        content:
+          "Um tutor de IA que ensina mudanças climáticas e sustentabilidade para estudantes do ensino médio, em linguagem acessível.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
+const SUGESTOES = [
+  "O que é o efeito estufa?",
+  "Por que a Amazônia importa para o clima?",
+  "O que são energias renováveis?",
+  "Como posso reduzir minha pegada de carbono?",
+];
+
 function Index() {
+  const transport = useMemo(
+    () => new DefaultChatTransport({ api: "/api/chat" }),
+    [],
+  );
+  const { messages, sendMessage, status, error, regenerate, stop } = useChat({
+    transport,
+  });
+  const [input, setInput] = useState("");
+
+  const handleSubmit = (message: { text: string }) => {
+    const text = message.text.trim();
+    if (!text) return;
+    sendMessage({ text });
+    setInput("");
+  };
+
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
+    <div className="flex h-dvh flex-col bg-background">
+      <header className="border-b bg-card/80 backdrop-blur">
+        <div className="mx-auto flex w-full max-w-3xl items-center gap-3 px-4 py-3">
+          <img
+            src={logo}
+            alt="ClimaTutor — broto crescendo do planeta Terra"
+            width={40}
+            height={40}
+            className="size-10"
+          />
+          <div>
+            <h1 className="font-display text-xl font-semibold leading-tight text-foreground">
+              ClimaTutor
+            </h1>
+            <p className="text-xs text-muted-foreground">
+              Seu tutor de IA sobre educação climática
+            </p>
+          </div>
+        </div>
+      </header>
+
+      <Conversation className="mx-auto w-full max-w-3xl flex-1">
+        <ConversationContent className="gap-6 px-4 py-6">
+          {messages.length === 0 ? (
+            <ConversationEmptyState>
+              <div className="flex flex-col items-center gap-4 px-4 text-center">
+                <img
+                  src={logo}
+                  alt=""
+                  width={96}
+                  height={96}
+                  className="size-24"
+                />
+                <h2 className="font-display text-2xl font-semibold text-foreground">
+                  Vamos aprender sobre o clima?
+                </h2>
+                <p className="max-w-md text-sm text-muted-foreground">
+                  Tire dúvidas sobre aquecimento global, sustentabilidade,
+                  energia limpa e muito mais. Escolha um tema ou escreva sua
+                  pergunta.
+                </p>
+                <div className="mt-2 flex flex-wrap justify-center gap-2">
+                  {SUGESTOES.map((sugestao) => (
+                    <button
+                      key={sugestao}
+                      type="button"
+                      onClick={() => sendMessage({ text: sugestao })}
+                      className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-sm text-secondary-foreground transition-colors hover:bg-secondary"
+                    >
+                      <Sprout className="size-3.5 text-leaf" />
+                      {sugestao}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </ConversationEmptyState>
+          ) : (
+            messages.map((message) => (
+              <Message key={message.id} from={message.role}>
+                <MessageContent>
+                  {message.parts.map((part, index) => {
+                    if (part.type === "reasoning") {
+                      return (
+                        <details
+                          key={index}
+                          className="mb-2 rounded-lg border border-border bg-muted/60 px-3 py-2 text-xs text-muted-foreground"
+                        >
+                          <summary className="flex cursor-pointer items-center gap-1.5 font-medium">
+                            <Brain className="size-3.5" />
+                            Raciocínio do tutor
+                          </summary>
+                          <p className="mt-1.5 whitespace-pre-wrap">
+                            {part.text}
+                          </p>
+                        </details>
+                      );
+                    }
+                    if (part.type === "text") {
+                      return (
+                        <MessageResponse key={index}>
+                          {part.text}
+                        </MessageResponse>
+                      );
+                    }
+                    return null;
+                  })}
+                </MessageContent>
+              </Message>
+            ))
+          )}
+
+          {status === "submitted" && (
+            <Message from="assistant">
+              <MessageContent>
+                <Shimmer>Pensando na sua pergunta...</Shimmer>
+              </MessageContent>
+            </Message>
+          )}
+
+          {error && (
+            <div className="mx-auto flex max-w-md flex-col items-center gap-2 rounded-xl border border-destructive/40 bg-card px-4 py-3 text-center">
+              <p className="text-sm text-destructive">
+                Não consegui falar com o tutor agora. Tente novamente.
+              </p>
+              <button
+                type="button"
+                onClick={() => regenerate()}
+                className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+              >
+                <RotateCcw className="size-3.5" />
+                Tentar de novo
+              </button>
+            </div>
+          )}
+        </ConversationContent>
+        <ConversationScrollButton />
+      </Conversation>
+
+      <footer className="border-t bg-card/80 backdrop-blur">
+        <div className="mx-auto w-full max-w-3xl px-4 py-3">
+          <PromptInput onSubmit={handleSubmit}>
+            <PromptInputTextarea
+              value={input}
+              onChange={(e) => setInput(e.currentTarget.value)}
+              placeholder="Pergunte sobre o clima... (ex.: o que é o aquecimento global?)"
+            />
+            <PromptInputFooter className="justify-end">
+              <PromptInputSubmit
+                status={status}
+                disabled={!input.trim() && status !== "streaming"}
+                onStop={stop}
+              />
+            </PromptInputFooter>
+          </PromptInput>
+          <p className="mt-2 text-center text-[11px] text-muted-foreground">
+            O ClimaTutor pode cometer erros. Verifique informações importantes
+            com seus professores.
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }

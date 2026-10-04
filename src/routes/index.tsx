@@ -81,16 +81,19 @@ function useVozParaTexto(aoTranscrever: (texto: string) => void) {
       reconhecimento.current?.stop();
       return;
     }
-    const Ctor = (
-      window as unknown as Record<string, new () => SpeechRecognitionType>
-    )["SpeechRecognition"] ??
-      (window as unknown as Record<string, new () => SpeechRecognitionType>)[
-        "webkitSpeechRecognition"
-      ];
+    const win = window as unknown as Record<
+      string,
+      (new () => SpeechRecognitionType) | undefined
+    >;
+    const Ctor = win["SpeechRecognition"] ?? win["webkitSpeechRecognition"];
+    if (!Ctor) return;
     const rec = new Ctor();
     rec.lang = "pt-BR";
     rec.interimResults = false;
-    rec.onresult = (e) => aoTranscrever(e.results[0][0].transcript);
+    rec.onresult = (e) => {
+      const trecho = e.results[0]?.[0]?.transcript;
+      if (trecho) aoTranscrever(trecho);
+    };
     rec.onend = () => setOuvindo(false);
     reconhecimento.current = rec;
     rec.start();

@@ -70,10 +70,14 @@ type SpeechRecognitionType = {
 
 function useVozParaTexto(aoTranscrever: (texto: string) => void) {
   const [ouvindo, setOuvindo] = useState(false);
+  const [suportado, setSuportado] = useState(false);
   const reconhecimento = useRef<SpeechRecognitionType | null>(null);
-  const suportado =
-    typeof window !== "undefined" &&
-    ("SpeechRecognition" in window || "webkitSpeechRecognition" in window);
+
+  useEffect(() => {
+    setSuportado(
+      "SpeechRecognition" in window || "webkitSpeechRecognition" in window,
+    );
+  }, []);
 
   const alternar = () => {
     if (!suportado) return;
@@ -105,10 +109,12 @@ function useVozParaTexto(aoTranscrever: (texto: string) => void) {
 
 function BotaoOuvir({ texto }: { texto: string }) {
   const [falando, setFalando] = useState(false);
-  const suportado =
-    typeof window !== "undefined" && "speechSynthesis" in window;
+  const [suportado, setSuportado] = useState(false);
 
-  useEffect(() => () => window.speechSynthesis?.cancel(), []);
+  useEffect(() => {
+    setSuportado("speechSynthesis" in window);
+    return () => window.speechSynthesis?.cancel();
+  }, []);
 
   if (!suportado) return null;
 

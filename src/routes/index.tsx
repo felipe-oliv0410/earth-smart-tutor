@@ -265,6 +265,21 @@ function Index() {
               placeholder="Pergunte sobre o clima... (ex.: o que é o aquecimento global?)"
             />
             <PromptInputFooter className="justify-end">
+              {voz.suportado && (
+                <button
+                  type="button"
+                  onClick={voz.alternar}
+                  aria-label={voz.ouvindo ? "Parar de gravar pergunta por voz" : "Fazer pergunta por voz"}
+                  className={`mr-auto inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs transition-colors ${
+                    voz.ouvindo
+                      ? "border-destructive/50 bg-destructive/10 text-destructive"
+                      : "border-border bg-card text-muted-foreground hover:bg-secondary hover:text-secondary-foreground"
+                  }`}
+                >
+                  {voz.ouvindo ? <MicOff className="size-3.5" /> : <Mic className="size-3.5" />}
+                  {voz.ouvindo ? "Ouvindo... toque para parar" : "Falar pergunta"}
+                </button>
+              )}
               <PromptInputSubmit
                 status={status}
                 disabled={!input.trim() && status !== "streaming"}

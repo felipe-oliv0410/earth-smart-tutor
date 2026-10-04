@@ -191,28 +191,37 @@ function Index() {
             </ConversationEmptyState>
           )}
 
-          {messages.map((message) => (
-            <Message key={message.id} from={message.role}>
-              <MessageContent>
-                {message.parts.map((part, i) =>
-                  part.type === "reasoning" ? (
-                    <details
-                      key={i}
-                      className="mb-2 rounded-lg border border-border bg-muted/60 px-3 py-2 text-xs text-muted-foreground"
-                    >
-                      <summary className="flex cursor-pointer items-center gap-1.5 font-medium">
-                        <Brain className="size-3.5" />
-                        Raciocínio do tutor
-                      </summary>
-                      <p className="mt-1.5 whitespace-pre-wrap">{part.text}</p>
-                    </details>
-                  ) : part.type === "text" ? (
-                    <MessageResponse key={i}>{part.text}</MessageResponse>
-                  ) : null,
-                )}
-              </MessageContent>
-            </Message>
-          ))}
+          {messages.map((message) => {
+            const textoDaMensagem = message.parts
+              .filter((p) => p.type === "text")
+              .map((p) => p.text)
+              .join("\n");
+            return (
+              <Message key={message.id} from={message.role}>
+                <MessageContent>
+                  {message.parts.map((part, i) =>
+                    part.type === "reasoning" ? (
+                      <details
+                        key={i}
+                        className="mb-2 rounded-lg border border-border bg-muted/60 px-3 py-2 text-xs text-muted-foreground"
+                      >
+                        <summary className="flex cursor-pointer items-center gap-1.5 font-medium">
+                          <Brain className="size-3.5" />
+                          Raciocínio do tutor
+                        </summary>
+                        <p className="mt-1.5 whitespace-pre-wrap">{part.text}</p>
+                      </details>
+                    ) : part.type === "text" ? (
+                      <MessageResponse key={i}>{part.text}</MessageResponse>
+                    ) : null,
+                  )}
+                  {message.role === "assistant" && textoDaMensagem && (
+                    <BotaoOuvir texto={textoDaMensagem} />
+                  )}
+                </MessageContent>
+              </Message>
+            );
+          })}
 
           {status === "submitted" && (
             <Message from="assistant">

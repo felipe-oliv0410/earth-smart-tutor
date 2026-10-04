@@ -4,6 +4,7 @@ import { DefaultChatTransport } from "ai";
 import { useEffect, useRef, useState } from "react";
 import {
   Brain,
+  Contrast,
   Mic,
   MicOff,
   RotateCcw,
@@ -146,12 +147,35 @@ function BotaoOuvir({ texto }: { texto: string }) {
 }
 // --- Fim dos recursos de voz ---
 
+// --- Alto contraste ---
+// Botão que alterna cores de alto contraste e salva a preferência no navegador.
+function useAltoContraste() {
+  const [ativo, setAtivo] = useState(false);
+
+  useEffect(() => {
+    const salvo = localStorage.getItem("alto-contraste") === "1";
+    setAtivo(salvo);
+    document.documentElement.classList.toggle("alto-contraste", salvo);
+  }, []);
+
+  const alternar = () => {
+    const novo = !ativo;
+    setAtivo(novo);
+    document.documentElement.classList.toggle("alto-contraste", novo);
+    localStorage.setItem("alto-contraste", novo ? "1" : "0");
+  };
+
+  return { ativo, alternar };
+}
+// --- Fim do alto contraste ---
+
 function Index() {
   const { messages, sendMessage, status, error, regenerate, stop } = useChat({
     transport,
   });
   const [input, setInput] = useState("");
   const voz = useVozParaTexto((texto) => setInput((atual) => (atual ? `${atual} ${texto}` : texto)));
+  const contraste = useAltoContraste();
 
   return (
     <div className="flex h-dvh flex-col bg-background">
@@ -166,6 +190,20 @@ function Index() {
               Seu tutor de IA sobre educação climática
             </p>
           </div>
+          <button
+            type="button"
+            onClick={contraste.alternar}
+            aria-label={contraste.ativo ? "Desativar alto contraste" : "Ativar alto contraste"}
+            aria-pressed={contraste.ativo}
+            className={`ml-auto inline-flex min-h-11 items-center gap-1.5 rounded-md border px-3 py-2 text-xs font-medium transition-colors ${
+              contraste.ativo
+                ? "border-primary bg-primary text-primary-foreground"
+                : "border-border bg-card text-secondary-foreground hover:bg-secondary"
+            }`}
+          >
+            <Contrast className="size-4" />
+            Alto contraste
+          </button>
         </div>
       </header>
 

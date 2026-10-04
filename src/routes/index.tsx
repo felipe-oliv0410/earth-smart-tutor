@@ -58,11 +58,91 @@ export const Route = createFileRoute("/")({
 
 const transport = new DefaultChatTransport({ api: "/api/chat" });
 
+// --- Acessibilidade por voz (usa recursos do próprio navegador) ---
+type SpeechRecognitionType = {
+  lang: string;
+  interimResults: boolean;
+  onresult: (e: { results: { [k: number]: { [k: number]: { transcript: string } } } }) => void;
+  onend: () => void;
+  start: () => void;
+  stop: () => void;
+};
+
+function useVozParaTexto(aoTranscrever: (texto: string) => void) {
+  const [ouvindo, setOuvindo] = useState(false);
+  const reconhecimento = useRef<SpeechRecognitionType | null>(null);
+  const suportado =
+    typeof window !== "undefined" &&
+    ("SpeechRecognition" in window || "webkitSpeechRecognition" in window);
+
+  const alternar = () => {
+    if (!suportado) return;
+    if (ouvindo) {
+      reconhecimento.current?.stop();
+      return;
+    }
+    const Ctor = (
+      window as unknown as Record<string, new () => SpeechRecognitionType>
+    )["SpeechRecognition"] ??
+      (window as unknown as Record<string, new () => SpeechRecognitionType>)[
+        "webkitSpeechRecognition"
+      ];
+    const rec = new Ctor();
+    rec.lang = "pt-BR";
+    rec.interimResults = false;
+    rec.onresult = (e) => aoTranscrever(e.results[0][0].transcript);
+    rec.onend = () => setOuvindo(false);
+    reconhecimento.current = rec;
+    rec.start();
+    setOuvindo(true);
+  };
+
+  return { suportado, ouvindo, alternar };
+}
+
+function BotaoOuvir({ texto }: { texto: string }) {
+  const [falando, setFalando] = useState(false);
+  const suportado =
+    typeof window !== "undefined" && "speechSynthesis" in window;
+
+  useEffect(() => () => window.speechSynthesis?.cancel(), []);
+
+  if (!suportado) return null;
+
+  const alternar = () => {
+    if (falando) {
+      window.speechSynthesis.cancel();
+      setFalando(false);
+      return;
+    }
+    const fala = new SpeechSynthesisUtterance(texto);
+    fala.lang = "pt-BR";
+    fala.onend = () => setFalando(false);
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(fala);
+    setFalando(true);
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={alternar}
+      aria-label={falando ? "Parar leitura em voz alta" : "Ouvir resposta em voz alta"}
+      className="mt-1 inline-flex w-fit items-center gap-1.5 rounded-md border border-border bg-card px-2.5 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-secondary hover:text-secondary-foreground"
+    >
+      {falando ? <VolumeX className="size-3.5" /> : <Volume2 className="size-3.5" />}
+      {falando ? "Parar leitura" : "Ouvir resposta"}
+    </button>
+  );
+}
+// --- Fim dos recursos de voz ---
+
 function Index() {
   const { messages, sendMessage, status, error, regenerate, stop } = useChat({
     transport,
   });
   const [input, setInput] = useState("");
+  const voz = useVozParaTexto((texto) => setInput((atual) => (atual ? `${atual} ${texto}` : texto)));
 
   return (
     <div className="flex h-dvh flex-col bg-background">

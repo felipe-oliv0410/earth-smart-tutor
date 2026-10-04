@@ -177,6 +177,7 @@ function Index() {
   });
   const [input, setInput] = useState("");
   const voz = useVozParaTexto((texto) => setInput((atual) => (atual ? `${atual} ${texto}` : texto)));
+  const contraste = useAltoContraste();
 
   return (
     <div className="flex h-dvh flex-col bg-background">
@@ -191,6 +192,20 @@ function Index() {
               Seu tutor de IA sobre educação climática
             </p>
           </div>
+          <button
+            type="button"
+            onClick={contraste.alternar}
+            aria-label={contraste.ativo ? "Desativar alto contraste" : "Ativar alto contraste"}
+            aria-pressed={contraste.ativo}
+            className={`ml-auto inline-flex min-h-11 items-center gap-1.5 rounded-md border px-3 py-2 text-xs font-medium transition-colors ${
+              contraste.ativo
+                ? "border-primary bg-primary text-primary-foreground"
+                : "border-border bg-card text-secondary-foreground hover:bg-secondary"
+            }`}
+          >
+            <Contrast className="size-4" />
+            Alto contraste
+          </button>
         </div>
       </header>
 

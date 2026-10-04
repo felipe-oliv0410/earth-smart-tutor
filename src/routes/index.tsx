@@ -1,8 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
-import { useState } from "react";
-import { Brain, RotateCcw, Sprout } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import {
+  Brain,
+  Mic,
+  MicOff,
+  RotateCcw,
+  Sprout,
+  Volume2,
+  VolumeX,
+} from "lucide-react";
 import {
   Conversation,
   ConversationContent,

@@ -159,12 +159,10 @@ function useAltoContraste() {
   }, []);
 
   const alternar = () => {
-    setAtivo((atual) => {
-      const novo = !atual;
-      document.documentElement.classList.toggle("alto-contraste", novo);
-      localStorage.setItem("alto-contraste", novo ? "1" : "0");
-      return novo;
-    });
+    const novo = !ativo;
+    setAtivo(novo);
+    document.documentElement.classList.toggle("alto-contraste", novo);
+    localStorage.setItem("alto-contraste", novo ? "1" : "0");
   };
 
   return { ativo, alternar };

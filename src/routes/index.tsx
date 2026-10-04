@@ -108,29 +108,27 @@ function useVozParaTexto(aoTranscrever: (texto: string) => void) {
   return { suportado, ouvindo, alternar };
 }
 
+// Leitura com voz de IA (natural). A lógica fica em src/lib/voz-ia.ts e src/routes/api/voz.ts.
 function BotaoOuvir({ texto }: { texto: string }) {
   const [falando, setFalando] = useState(false);
-  const [suportado, setSuportado] = useState(false);
+  const controle = useRef<AbortController | null>(null);
 
-  useEffect(() => {
-    setSuportado("speechSynthesis" in window);
-    return () => window.speechSynthesis?.cancel();
-  }, []);
+  useEffect(() => () => controle.current?.abort(), []);
 
-  if (!suportado) return null;
-
-  const alternar = () => {
+  const alternar = async () => {
     if (falando) {
-      window.speechSynthesis.cancel();
-      setFalando(false);
+      controle.current?.abort();
       return;
     }
-    const fala = new SpeechSynthesisUtterance(texto);
-    fala.lang = "pt-BR";
-    fala.onend = () => setFalando(false);
-    window.speechSynthesis.cancel();
-    window.speechSynthesis.speak(fala);
+    controle.current = new AbortController();
     setFalando(true);
+    try {
+      await streamSpeech("/api/voz", texto, controle.current.signal);
+    } catch (e) {
+      if (!controle.current?.signal.aborted) console.error(e);
+    } finally {
+      setFalando(false);
+    }
   };
 
   return (

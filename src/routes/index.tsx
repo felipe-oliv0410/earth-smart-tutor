@@ -1,8 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
-import { useState } from "react";
-import { Brain, RotateCcw, Sprout } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import {
+  Brain,
+  Mic,
+  MicOff,
+  RotateCcw,
+  Sprout,
+  Volume2,
+  VolumeX,
+} from "lucide-react";
 import {
   Conversation,
   ConversationContent,
@@ -50,11 +58,100 @@ export const Route = createFileRoute("/")({
 
 const transport = new DefaultChatTransport({ api: "/api/chat" });
 
+// --- Acessibilidade por voz (usa recursos do próprio navegador) ---
+type SpeechRecognitionType = {
+  lang: string;
+  interimResults: boolean;
+  onresult: (e: { results: { [k: number]: { [k: number]: { transcript: string } } } }) => void;
+  onend: () => void;
+  start: () => void;
+  stop: () => void;
+};
+
+function useVozParaTexto(aoTranscrever: (texto: string) => void) {
+  const [ouvindo, setOuvindo] = useState(false);
+  const [suportado, setSuportado] = useState(false);
+  const reconhecimento = useRef<SpeechRecognitionType | null>(null);
+
+  useEffect(() => {
+    setSuportado(
+      "SpeechRecognition" in window || "webkitSpeechRecognition" in window,
+    );
+  }, []);
+
+  const alternar = () => {
+    if (!suportado) return;
+    if (ouvindo) {
+      reconhecimento.current?.stop();
+      return;
+    }
+    const win = window as unknown as Record<
+      string,
+      (new () => SpeechRecognitionType) | undefined
+    >;
+    const Ctor = win["SpeechRecognition"] ?? win["webkitSpeechRecognition"];
+    if (!Ctor) return;
+    const rec = new Ctor();
+    rec.lang = "pt-BR";
+    rec.interimResults = false;
+    rec.onresult = (e) => {
+      const trecho = e.results[0]?.[0]?.transcript;
+      if (trecho) aoTranscrever(trecho);
+    };
+    rec.onend = () => setOuvindo(false);
+    reconhecimento.current = rec;
+    rec.start();
+    setOuvindo(true);
+  };
+
+  return { suportado, ouvindo, alternar };
+}
+
+function BotaoOuvir({ texto }: { texto: string }) {
+  const [falando, setFalando] = useState(false);
+  const [suportado, setSuportado] = useState(false);
+
+  useEffect(() => {
+    setSuportado("speechSynthesis" in window);
+    return () => window.speechSynthesis?.cancel();
+  }, []);
+
+  if (!suportado) return null;
+
+  const alternar = () => {
+    if (falando) {
+      window.speechSynthesis.cancel();
+      setFalando(false);
+      return;
+    }
+    const fala = new SpeechSynthesisUtterance(texto);
+    fala.lang = "pt-BR";
+    fala.onend = () => setFalando(false);
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(fala);
+    setFalando(true);
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={alternar}
+      aria-label={falando ? "Parar leitura em voz alta" : "Ouvir resposta em voz alta"}
+      className="mt-1 inline-flex w-fit items-center gap-1.5 rounded-md border border-border bg-card px-2.5 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-secondary hover:text-secondary-foreground"
+    >
+      {falando ? <VolumeX className="size-3.5" /> : <Volume2 className="size-3.5" />}
+      {falando ? "Parar leitura" : "Ouvir resposta"}
+    </button>
+  );
+}
+// --- Fim dos recursos de voz ---
+
 function Index() {
   const { messages, sendMessage, status, error, regenerate, stop } = useChat({
     transport,
   });
   const [input, setInput] = useState("");
+  const voz = useVozParaTexto((texto) => setInput((atual) => (atual ? `${atual} ${texto}` : texto)));
 
   return (
     <div className="flex h-dvh flex-col bg-background">
@@ -103,28 +200,37 @@ function Index() {
             </ConversationEmptyState>
           )}
 
-          {messages.map((message) => (
-            <Message key={message.id} from={message.role}>
-              <MessageContent>
-                {message.parts.map((part, i) =>
-                  part.type === "reasoning" ? (
-                    <details
-                      key={i}
-                      className="mb-2 rounded-lg border border-border bg-muted/60 px-3 py-2 text-xs text-muted-foreground"
-                    >
-                      <summary className="flex cursor-pointer items-center gap-1.5 font-medium">
-                        <Brain className="size-3.5" />
-                        Raciocínio do tutor
-                      </summary>
-                      <p className="mt-1.5 whitespace-pre-wrap">{part.text}</p>
-                    </details>
-                  ) : part.type === "text" ? (
-                    <MessageResponse key={i}>{part.text}</MessageResponse>
-                  ) : null,
-                )}
-              </MessageContent>
-            </Message>
-          ))}
+          {messages.map((message) => {
+            const textoDaMensagem = message.parts
+              .filter((p) => p.type === "text")
+              .map((p) => p.text)
+              .join("\n");
+            return (
+              <Message key={message.id} from={message.role}>
+                <MessageContent>
+                  {message.parts.map((part, i) =>
+                    part.type === "reasoning" ? (
+                      <details
+                        key={i}
+                        className="mb-2 rounded-lg border border-border bg-muted/60 px-3 py-2 text-xs text-muted-foreground"
+                      >
+                        <summary className="flex cursor-pointer items-center gap-1.5 font-medium">
+                          <Brain className="size-3.5" />
+                          Raciocínio do tutor
+                        </summary>
+                        <p className="mt-1.5 whitespace-pre-wrap">{part.text}</p>
+                      </details>
+                    ) : part.type === "text" ? (
+                      <MessageResponse key={i}>{part.text}</MessageResponse>
+                    ) : null,
+                  )}
+                  {message.role === "assistant" && textoDaMensagem && (
+                    <BotaoOuvir texto={textoDaMensagem} />
+                  )}
+                </MessageContent>
+              </Message>
+            );
+          })}
 
           {status === "submitted" && (
             <Message from="assistant">
@@ -168,6 +274,21 @@ function Index() {
               placeholder="Pergunte sobre o clima... (ex.: o que é o aquecimento global?)"
             />
             <PromptInputFooter className="justify-end">
+              {voz.suportado && (
+                <button
+                  type="button"
+                  onClick={voz.alternar}
+                  aria-label={voz.ouvindo ? "Parar de gravar pergunta por voz" : "Fazer pergunta por voz"}
+                  className={`mr-auto inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs transition-colors ${
+                    voz.ouvindo
+                      ? "border-destructive/50 bg-destructive/10 text-destructive"
+                      : "border-border bg-card text-muted-foreground hover:bg-secondary hover:text-secondary-foreground"
+                  }`}
+                >
+                  {voz.ouvindo ? <MicOff className="size-3.5" /> : <Mic className="size-3.5" />}
+                  {voz.ouvindo ? "Ouvindo... toque para parar" : "Falar pergunta"}
+                </button>
+              )}
               <PromptInputSubmit
                 status={status}
                 disabled={!input.trim() && status !== "streaming"}

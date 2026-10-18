@@ -17,6 +17,9 @@
   "dependencies": {
     "@ai-sdk/openai": "^4.0.66",
     "@ai-sdk/react": "^4.0.100",
+    "@fontsource/atkinson-hyperlegible": "^5.3.0",
+    "@fontsource/lexend": "^5.3.0",
+    "@fontsource/opendyslexic": "^5.3.0",
     "@hookform/resolvers": "^5.2.2",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-alert-dialog": "^1.1.15",

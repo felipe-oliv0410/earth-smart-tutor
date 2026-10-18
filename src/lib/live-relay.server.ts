@@ -129,7 +129,6 @@ async function answerQuestion(
     instructions: tutorPrompt(context.mode) + "\nResponda em português do Brasil para uma conversa falada, sem markdown. Use a correção mais recente do aluno e respeite as regras pedagógicas do tutor. Nunca invente números. Não execute ações externas.",
     reasoning: { effort: "low", summary: "auto" },
     include: ["reasoning.encrypted_content"],
-    store: false,
   }, {
     signal,
     runId: correlation.runID,

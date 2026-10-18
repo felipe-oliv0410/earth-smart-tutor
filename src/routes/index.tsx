@@ -277,8 +277,8 @@ function Index() {
                       <MessageResponse key={i}>{part.text}</MessageResponse>
                     ) : null,
                   )}
-                  {message.role === "assistant" && textoDaMensagem && (
-                    {!voiceActive && <BotaoOuvir texto={textoDaMensagem} velocidade={accessibility.settings.speed} />}
+                  {message.role === "assistant" && textoDaMensagem && !voiceActive && (
+                    <BotaoOuvir texto={textoDaMensagem} velocidade={accessibility.settings.speed} />
                   )}
                 </MessageContent>
               </Message>

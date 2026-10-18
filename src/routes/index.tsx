@@ -248,7 +248,7 @@ function Index() {
                       className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-sm text-secondary-foreground transition-colors hover:bg-secondary"
                     >
                       <Sprout className="size-3.5 text-leaf" />
-                      {s}
+                      {s.texto}
                     </button>
                   ))}
                 </div>
@@ -320,7 +320,7 @@ function Index() {
           <PromptInput
             onSubmit={({ text }) => {
               if (!text.trim()) return;
-              sendMessage({ text: text.trim() });
+              sendMessage({ text: text.trim() }, { body: { modo } });
               setInput("");
             }}
           >

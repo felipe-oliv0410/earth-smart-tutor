@@ -182,8 +182,18 @@ function Index() {
     transport,
   });
   const [input, setInput] = useState("");
+  // Modo da conversa: undefined = tutor livre; "sensibilizacao"/"escola" = mentor socrático.
+  const [modo, setModo] = useState<string | undefined>(undefined);
   const voz = useVozParaTexto((texto) => setInput((atual) => (atual ? `${atual} ${texto}` : texto)));
   const contraste = useAltoContraste();
+
+  const enviarSugestao = (s: Sugestao) => {
+    if (s.modo) setModo(s.modo);
+    sendMessage(
+      { text: s.modo ? "Quero começar a conversa." : s.texto },
+      { body: { modo: s.modo } },
+    );
+  };
 
   return (
     <div className="flex h-dvh flex-col bg-background">

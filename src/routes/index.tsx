@@ -37,11 +37,20 @@ import logo from "@/assets/logo.png";
 const TITULO = "ClimaTutor — Tutor de IA sobre Educação Climática";
 const DESCRICAO =
   "Converse com o ClimaTutor, um tutor de IA que ensina mudanças climáticas, sustentabilidade e soluções para estudantes do ensino médio.";
-const SUGESTOES = [
-  "O que é o efeito estufa?",
-  "Por que a Amazônia importa para o clima?",
-  "O que são energias renováveis?",
-  "Como posso reduzir minha pegada de carbono?",
+// Sugestões: sem "modo" enviam a pergunta como texto; com "modo" iniciam uma
+// conversa guiada pelo tutor (o prompt do modo fica no servidor, em api/chat.ts).
+type Sugestao = { texto: string; modo?: string };
+const SUGESTOES: Sugestao[] = [
+  {
+    texto: "Mentor de sensibilização climática",
+    modo: "sensibilizacao",
+  },
+  {
+    texto: "Consultor: minha escola mais sustentável",
+    modo: "escola",
+  },
+  { texto: "O que são energias renováveis?" },
+  { texto: "Como posso reduzir minha pegada de carbono?" },
 ];
 
 export const Route = createFileRoute("/")({
@@ -173,8 +182,18 @@ function Index() {
     transport,
   });
   const [input, setInput] = useState("");
+  // Modo da conversa: undefined = tutor livre; "sensibilizacao"/"escola" = mentor socrático.
+  const [modo, setModo] = useState<string | undefined>(undefined);
   const voz = useVozParaTexto((texto) => setInput((atual) => (atual ? `${atual} ${texto}` : texto)));
   const contraste = useAltoContraste();
+
+  const enviarSugestao = (s: Sugestao) => {
+    if (s.modo) setModo(s.modo);
+    sendMessage(
+      { text: s.modo ? "Quero começar a conversa." : s.texto },
+      { body: { modo: s.modo } },
+    );
+  };
 
   return (
     <div className="flex h-dvh flex-col bg-background">
@@ -223,13 +242,13 @@ function Index() {
                 <div className="mt-2 flex flex-wrap justify-center gap-2">
                   {SUGESTOES.map((s) => (
                     <button
-                      key={s}
+                      key={s.texto}
                       type="button"
-                      onClick={() => sendMessage({ text: s })}
+                      onClick={() => enviarSugestao(s)}
                       className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-sm text-secondary-foreground transition-colors hover:bg-secondary"
                     >
                       <Sprout className="size-3.5 text-leaf" />
-                      {s}
+                      {s.texto}
                     </button>
                   ))}
                 </div>
@@ -301,7 +320,7 @@ function Index() {
           <PromptInput
             onSubmit={({ text }) => {
               if (!text.trim()) return;
-              sendMessage({ text: text.trim() });
+              sendMessage({ text: text.trim() }, { body: { modo } });
               setInput("");
             }}
           >

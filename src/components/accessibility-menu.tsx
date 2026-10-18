@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Accessibility, Contrast, Minus, Plus, RotateCcw, X } from "lucide-react";
+import { Contrast, Minus, Plus, RotateCcw, X } from "lucide-react";
+import { IconeAcessibilidade } from "@/components/icons/acessibilidade";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -39,7 +40,7 @@ export function AccessibilityMenu({ settings, update }: ReturnType<typeof useAcc
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button variant="outline" className="ml-auto min-h-11 shrink-0 px-3" aria-label="Menu de acessibilidade">
-          <Accessibility /><span className="hidden sm:inline">Acessibilidade</span>
+          <IconeAcessibilidade className="size-5!" /><span className="hidden sm:inline">Acessibilidade</span>
         </Button>
       </PopoverTrigger>
       <PopoverContent align="end" collisionPadding={12} aria-label="Acessibilidade" className="accessibility-panel w-80 max-w-[calc(100vw-24px)] space-y-4 overflow-y-auto">

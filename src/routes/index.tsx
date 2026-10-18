@@ -242,9 +242,9 @@ function Index() {
                 <div className="mt-2 flex flex-wrap justify-center gap-2">
                   {SUGESTOES.map((s) => (
                     <button
-                      key={s}
+                      key={s.texto}
                       type="button"
-                      onClick={() => sendMessage({ text: s })}
+                      onClick={() => enviarSugestao(s)}
                       className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-sm text-secondary-foreground transition-colors hover:bg-secondary"
                     >
                       <Sprout className="size-3.5 text-leaf" />

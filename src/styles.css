@@ -1,6 +1,9 @@
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
+@import "@fontsource/opendyslexic";
+@import "@fontsource/atkinson-hyperlegible";
+@import "@fontsource/lexend";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -164,10 +167,14 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
-    font-family: var(--font-sans-app);
+    font-family: var(--accessible-font, var(--font-sans-app));
   }
 
   .font-display {
-    font-family: var(--font-display-app);
+    font-family: var(--accessible-font, var(--font-display-app));
   }
+}
+
+.accessibility-panel {
+  max-height: min(90dvh, var(--radix-popover-content-available-height));
 }

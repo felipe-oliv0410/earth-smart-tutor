@@ -8,7 +8,9 @@ export const Route = createFileRoute("/api/voz")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const { text } = (await request.json()) as { text?: string };
+        const { text, speed = 1 } = (await request.json()) as { text?: string; speed?: number };
+        // A velocidade é pedida à própria IA (sem acelerar o áudio), para a voz não ficar fina.
+        const ritmo = speed >= 1.6 ? "bem rápido" : speed >= 1.2 ? "um pouco mais rápido que o normal" : speed <= 0.7 ? "bem devagar, pausadamente" : speed <= 0.9 ? "um pouco mais devagar que o normal" : "em ritmo natural";
         if (!text || typeof text !== "string") return new Response("Texto ausente", { status: 400 });
         const limpo = text.replace(/[*#_`>|-]+/g, " ").slice(0, 4000);
 
@@ -20,7 +22,7 @@ export const Route = createFileRoute("/api/voz")({
           },
           body: JSON.stringify({
             model: "google/gemini-3.1-flash-tts-preview",
-            contents: [{ role: "user", parts: [{ text: `Leia em português do Brasil, com tom calmo e acolhedor de professor: ${limpo}` }] }],
+            contents: [{ role: "user", parts: [{ text: `Leia em português do Brasil, com tom calmo e acolhedor de professor, falando ${ritmo}: ${limpo}` }] }],
             generationConfig: {
               responseModalities: ["AUDIO"],
               speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: VOZ } } },

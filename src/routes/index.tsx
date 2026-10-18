@@ -49,6 +49,14 @@ const SUGESTOES: Sugestao[] = [
     texto: "Consultor: minha escola mais sustentável",
     modo: "escola",
   },
+  {
+    texto: "Decifrando as COPs",
+    modo: "cops",
+  },
+  {
+    texto: "NDCs: das promessas à prática",
+    modo: "ndcs",
+  },
   { texto: "O que são energias renováveis?" },
   { texto: "Como posso reduzir minha pegada de carbono?" },
 ];

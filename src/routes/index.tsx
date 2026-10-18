@@ -4,6 +4,10 @@ import { DefaultChatTransport } from "ai";
 import { useEffect, useRef, useState } from "react";
 import { streamSpeech } from "@/lib/voz-ia";
 import { AccessibilityMenu, useAccessibility } from "@/components/accessibility-menu";
+import { useLiveVoice } from "@/hooks/use-live-voice";
+import { LiveVoiceControls } from "@/components/live-voice-controls";
+import { normalizeVoiceContext, voiceSeconds } from "@/lib/live-context";
+import { Button } from "@/components/ui/button";
 import {
   Brain,
   Mic,
@@ -170,6 +174,18 @@ function Index() {
   const [modo, setModo] = useState<string | undefined>(undefined);
   const voz = useVozParaTexto((texto) => setInput((atual) => (atual ? `${atual} ${texto}` : texto)));
   const accessibility = useAccessibility();
+  const [seconds, setSeconds] = useState<number | null>(null);
+  const [caption, setCaption] = useState("");
+  const call = useLiveVoice({
+    context: normalizeVoiceContext({ mode: modo, speed: accessibility.settings.speed, history: messages.map(message => ({ role: message.role, text: message.parts.filter(part => part.type === "text").map(part => part.text).join("\n") })) }),
+    onEvent(event) {
+      if (event.type === "gateway.session.created") { setSeconds(15); setCaption(""); }
+      if (typeof event.usage?.seconds === "number" && Number.isFinite(event.usage.seconds)) setSeconds(voiceSeconds(event.usage.seconds));
+      if (event.type === "session.output_transcript.delta" && typeof event["delta"] === "string") setCaption(current => (current + event["delta"]).slice(-1600));
+      if (event.type === "session.input_transcript.delta") setCaption("");
+    },
+  });
+  const voiceActive = call.status === "connecting" || call.status === "connected" || call.status === "stopping";
 
   const enviarSugestao = (s: Sugestao) => {
     if (s.modo) setModo(s.modo);
@@ -192,9 +208,19 @@ function Index() {
               Seu tutor de IA sobre educação climática
             </p>
           </div>
-          <AccessibilityMenu {...accessibility} />
+          <AccessibilityMenu {...accessibility} voiceControls={<LiveVoiceControls call={call} seconds={seconds} />} />
         </div>
       </header>
+      <audio ref={call.audioRef} autoPlay className="hidden" />
+      {(voiceActive || call.error) && <div className="border-b bg-muted px-4 py-2">
+        <div className="mx-auto flex max-w-3xl flex-wrap items-center gap-2 text-sm">
+          <span role="status" className="flex-1">{call.status === "connecting" ? "Conectando modo voz…" : call.status === "stopping" ? "Encerrando modo voz…" : "Modo voz"}</span>
+          {voiceActive && <Button variant="outline" className="min-h-11" disabled={call.status === "stopping"} onClick={call.stop}>Encerrar modo voz</Button>}
+          {call.playbackBlocked && <Button variant="outline" onClick={call.resumePlayback}>Ouvir tutor</Button>}
+          {call.error && <p role="alert" className="w-full text-destructive break-words">{call.error}</p>}
+          {caption && <p className="w-full max-h-24 overflow-y-auto text-muted-foreground" aria-label="Legenda do tutor">{caption}</p>}
+        </div>
+      </div>}
 
       <Conversation className="mx-auto w-full max-w-3xl flex-1">
         <ConversationContent className="gap-6 px-4 py-6">
@@ -251,7 +277,7 @@ function Index() {
                       <MessageResponse key={i}>{part.text}</MessageResponse>
                     ) : null,
                   )}
-                  {message.role === "assistant" && textoDaMensagem && (
+                  {message.role === "assistant" && textoDaMensagem && !voiceActive && (
                     <BotaoOuvir texto={textoDaMensagem} velocidade={accessibility.settings.speed} />
                   )}
                 </MessageContent>
@@ -301,7 +327,7 @@ function Index() {
               placeholder="Pergunte sobre o clima... (ex.: o que é o aquecimento global?)"
             />
             <PromptInputFooter className="justify-end">
-              {voz.suportado && (
+              {voz.suportado && !voiceActive && (
                 <button
                   type="button"
                   onClick={voz.alternar}

@@ -190,7 +190,7 @@ function Index() {
     transport,
   });
   const [input, setInput] = useState("");
-  // Modo da conversa: undefined = tutor livre; "sensibilizacao"/"escola" = mentor socrático.
+  // Modo da conversa: undefined = tutor livre; senão, um dos modos guiados de api/chat.ts.
   const [modo, setModo] = useState<string | undefined>(undefined);
   const voz = useVozParaTexto((texto) => setInput((atual) => (atual ? `${atual} ${texto}` : texto)));
   const contraste = useAltoContraste();

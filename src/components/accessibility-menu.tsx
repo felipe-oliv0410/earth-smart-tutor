@@ -35,7 +35,7 @@ export function useAccessibility() {
   return { settings, update };
 }
 
-export function AccessibilityMenu({ settings, update }: ReturnType<typeof useAccessibility>) {
+export function AccessibilityMenu({ settings, update, voiceControls }: ReturnType<typeof useAccessibility> & { voiceControls?: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -71,6 +71,7 @@ export function AccessibilityMenu({ settings, update }: ReturnType<typeof useAcc
           <div className="flex justify-between text-sm font-medium"><h3 id="speech-speed-label">Velocidade da leitura</h3><output aria-live="polite" className="tabular-nums">{settings.speed.toFixed(1).replace(".", ",")}×</output></div>
           <Slider aria-labelledby="speech-speed-label" min={0.5} max={2} step={0.1} value={[settings.speed]} onValueChange={([speed = 1]) => update({ speed: Math.round(speed * 10) / 10 })} />
         </section>
+        {voiceControls}
         <Button variant="ghost" className="min-h-11 w-full whitespace-normal" onClick={() => update(DEFAULT_SETTINGS)}><RotateCcw />Restaurar padrão</Button>
       </PopoverContent>
     </Popover>

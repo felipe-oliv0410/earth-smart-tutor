@@ -51,7 +51,7 @@ export function AccessibilityMenu({ settings, update }: ReturnType<typeof useAcc
         </div>
         <section className="space-y-3">
           <div className="flex justify-between text-sm font-medium"><h3 id="text-size-label">Tamanho da fonte</h3><output aria-live="polite" className="tabular-nums">{settings.size}%</output></div>
-          <Slider aria-labelledby="text-size-label" min={80} max={200} step={10} value={[settings.size]} onValueChange={([size]) => update({ size })} />
+          <Slider aria-labelledby="text-size-label" min={80} max={200} step={10} value={[settings.size]} onValueChange={([size = 100]) => update({ size })} />
         </section>
         <div className="space-y-2">
           <label id="font-label" className="text-sm font-medium">Fonte</label>
@@ -66,7 +66,7 @@ export function AccessibilityMenu({ settings, update }: ReturnType<typeof useAcc
         </div>
         <section className="space-y-3">
           <div className="flex justify-between text-sm font-medium"><h3 id="speech-speed-label">Velocidade da leitura</h3><output aria-live="polite" className="tabular-nums">{settings.speed.toFixed(1).replace(".", ",")}×</output></div>
-          <Slider aria-labelledby="speech-speed-label" min={0.5} max={2} step={0.1} value={[settings.speed]} onValueChange={([speed]) => update({ speed: Math.round(speed * 10) / 10 })} />
+          <Slider aria-labelledby="speech-speed-label" min={0.5} max={2} step={0.1} value={[settings.speed]} onValueChange={([speed = 1]) => update({ speed: Math.round(speed * 10) / 10 })} />
         </section>
         <Button variant="ghost" className="min-h-11 w-full whitespace-normal" onClick={() => update(DEFAULT_SETTINGS)}><RotateCcw />Restaurar padrão</Button>
       </PopoverContent>

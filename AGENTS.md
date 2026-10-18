@@ -10,4 +10,4 @@
 <!-- LOVABLE:END -->
 
 - Keep accessibility settings in one browser-side hook and menu; apply typography globally and migrate the legacy contrast preference to preserve returning visitors' choices.
-- Set AI speech playback rate on audio sources and adjust chunk scheduling by the same rate to avoid overlaps or gaps.
+- Change AI speech speed by instructing the TTS model (not playbackRate), so the voice pitch stays natural.

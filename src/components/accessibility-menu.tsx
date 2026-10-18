@@ -5,8 +5,7 @@ import { IconeAcessibilidade } from "@/components/icons/acessibilidade";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { DEFAULT_SETTINGS, FONT_OPTIONS, normalizeSettings, type AccessibilitySettings } from "@/lib/accessibility";
+import { DEFAULT_SETTINGS, FONT_OPTIONS, THEMES, type Theme, normalizeSettings, type AccessibilitySettings } from "@/lib/accessibility";
 
 export function useAccessibility() {
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
@@ -25,10 +24,11 @@ export function useAccessibility() {
     root.style.fontSize = `${settings.size}%`;
     if (family) root.style.setProperty("--accessible-font", family);
     else root.style.removeProperty("--accessible-font");
-    root.classList.toggle("alto-contraste", settings.contrast);
+    root.classList.toggle("alto-contraste", settings.theme === "contraste");
+    root.classList.toggle("dark", settings.theme === "escuro");
     try {
       localStorage.setItem("climatutor-accessibility", JSON.stringify(settings));
-      localStorage.setItem("alto-contraste", settings.contrast ? "1" : "0");
+      localStorage.setItem("alto-contraste", settings.theme === "contraste" ? "1" : "0");
     } catch { /* Settings still apply without storage. */ }
   }, [settings, ready]);
   const update = (patch: Partial<AccessibilitySettings>) => setSettings((current) => normalizeSettings({ ...current, ...patch }));
@@ -60,9 +60,12 @@ export function AccessibilityMenu({ settings, update }: ReturnType<typeof useAcc
             <SelectContent>{FONT_OPTIONS.map((font) => <SelectItem key={font.value} value={font.value} className="min-h-11">{font.label}</SelectItem>)}</SelectContent>
           </Select>
         </div>
-        <div className="flex items-center justify-between gap-3 border-y border-border py-3">
-          <label htmlFor="contrast-switch" className="flex items-center gap-2 text-sm font-medium"><Contrast className="size-4" />Alto contraste</label>
-          <Switch id="contrast-switch" checked={settings.contrast} onCheckedChange={(contrast) => update({ contrast })} />
+        <div className="space-y-2">
+          <label id="theme-label" className="flex items-center gap-2 text-sm font-medium"><Contrast className="size-4" />Tema</label>
+          <Select value={settings.theme} onValueChange={(theme) => update({ theme: theme as Theme })}>
+            <SelectTrigger aria-labelledby="theme-label" className="min-h-11"><SelectValue /></SelectTrigger>
+            <SelectContent>{THEMES.map((t) => <SelectItem key={t.value} value={t.value} className="min-h-11">{t.label}</SelectItem>)}</SelectContent>
+          </Select>
         </div>
         <section className="space-y-3">
           <div className="flex justify-between text-sm font-medium"><h3 id="speech-speed-label">Velocidade da leitura</h3><output aria-live="polite" className="tabular-nums">{settings.speed.toFixed(1).replace(".", ",")}×</output></div>

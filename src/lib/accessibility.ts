@@ -9,14 +9,17 @@ export const FONT_OPTIONS = [
   { value: "courier", label: "Courier New", family: '"Courier New", monospace' },
 ] as const;
 
-export type AccessibilitySettings = { size: number; font: string; contrast: boolean; speed: number };
-export const DEFAULT_SETTINGS: AccessibilitySettings = { size: 100, font: "default", contrast: false, speed: 1 };
+export type AccessibilitySettings = { size: number; font: string; theme: Theme; speed: number };
+export const THEMES = [{ value: "claro", label: "Modo claro" }, { value: "escuro", label: "Modo escuro" }, { value: "contraste", label: "Alto contraste" }] as const;
+export type Theme = (typeof THEMES)[number]["value"];
+export const DEFAULT_SETTINGS: AccessibilitySettings = { size: 100, font: "default", theme: "claro", speed: 1 };
 
-export function normalizeSettings(value: Partial<AccessibilitySettings>): AccessibilitySettings {
+export function normalizeSettings(value: Partial<AccessibilitySettings> & { contrast?: boolean }): AccessibilitySettings {
   return {
     size: typeof value.size === "number" && Number.isFinite(value.size) ? Math.min(200, Math.max(80, value.size)) : 100,
     font: FONT_OPTIONS.some((font) => font.value === value.font) ? value.font ?? "default" : "default",
-    contrast: value.contrast === true,
+    // "contrast" é a preferência antiga (antes dos temas).
+    theme: THEMES.find((t) => t.value === value.theme)?.value ?? (value.contrast === true ? "contraste" : "claro"),
     speed: typeof value.speed === "number" && Number.isFinite(value.speed) ? Math.min(2, Math.max(0.5, value.speed)) : 1,
   };
 }

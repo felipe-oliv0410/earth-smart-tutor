@@ -8,3 +8,6 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Keep accessibility settings in one browser-side hook and menu; apply typography globally and migrate the legacy contrast preference to preserve returning visitors' choices.
+- Set AI speech playback rate on audio sources and adjust chunk scheduling by the same rate to avoid overlaps or gaps.

@@ -3,9 +3,9 @@ import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { useEffect, useRef, useState } from "react";
 import { streamSpeech } from "@/lib/voz-ia";
+import { AccessibilityMenu, useAccessibility } from "@/components/accessibility-menu";
 import {
   Brain,
-  Contrast,
   Mic,
   MicOff,
   RotateCcw,
@@ -125,7 +125,7 @@ function useVozParaTexto(aoTranscrever: (texto: string) => void) {
 }
 
 // Leitura com voz de IA (natural). A lógica fica em src/lib/voz-ia.ts e src/routes/api/voz.ts.
-function BotaoOuvir({ texto }: { texto: string }) {
+function BotaoOuvir({ texto, velocidade }: { texto: string; velocidade: number }) {
   const [falando, setFalando] = useState(false);
   const controle = useRef<AbortController | null>(null);
 
@@ -139,7 +139,7 @@ function BotaoOuvir({ texto }: { texto: string }) {
     controle.current = new AbortController();
     setFalando(true);
     try {
-      await streamSpeech("/api/voz", texto, controle.current.signal);
+      await streamSpeech("/api/voz", texto, controle.current.signal, velocidade);
     } catch (e) {
       if (!controle.current?.signal.aborted) console.error(e);
     } finally {
@@ -161,28 +161,6 @@ function BotaoOuvir({ texto }: { texto: string }) {
 }
 // --- Fim dos recursos de voz ---
 
-// --- Alto contraste ---
-// Botão que alterna cores de alto contraste e salva a preferência no navegador.
-function useAltoContraste() {
-  const [ativo, setAtivo] = useState(false);
-
-  useEffect(() => {
-    const salvo = localStorage.getItem("alto-contraste") === "1";
-    setAtivo(salvo);
-    document.documentElement.classList.toggle("alto-contraste", salvo);
-  }, []);
-
-  const alternar = () => {
-    const novo = !ativo;
-    setAtivo(novo);
-    document.documentElement.classList.toggle("alto-contraste", novo);
-    localStorage.setItem("alto-contraste", novo ? "1" : "0");
-  };
-
-  return { ativo, alternar };
-}
-// --- Fim do alto contraste ---
-
 function Index() {
   const { messages, sendMessage, status, error, regenerate, stop } = useChat({
     transport,
@@ -191,7 +169,7 @@ function Index() {
   // Modo da conversa: undefined = tutor livre; senão, um dos modos guiados de api/chat.ts.
   const [modo, setModo] = useState<string | undefined>(undefined);
   const voz = useVozParaTexto((texto) => setInput((atual) => (atual ? `${atual} ${texto}` : texto)));
-  const contraste = useAltoContraste();
+  const accessibility = useAccessibility();
 
   const enviarSugestao = (s: Sugestao) => {
     if (s.modo) setModo(s.modo);
@@ -206,7 +184,7 @@ function Index() {
       <header className="border-b bg-card/80 backdrop-blur">
         <div className="mx-auto flex w-full max-w-3xl items-center gap-3 px-4 py-3">
           <img src={logo} alt="ClimaTutor" className="size-10" />
-          <div>
+          <div className="min-w-0">
             <h1 className="font-display text-xl font-semibold leading-tight text-foreground">
               ClimaTutor
             </h1>
@@ -214,20 +192,7 @@ function Index() {
               Seu tutor de IA sobre educação climática
             </p>
           </div>
-          <button
-            type="button"
-            onClick={contraste.alternar}
-            aria-label={contraste.ativo ? "Desativar alto contraste" : "Ativar alto contraste"}
-            aria-pressed={contraste.ativo}
-            className={`ml-auto inline-flex min-h-11 items-center gap-1.5 rounded-md border px-3 py-2 text-xs font-medium transition-colors ${
-              contraste.ativo
-                ? "border-primary bg-primary text-primary-foreground"
-                : "border-border bg-card text-secondary-foreground hover:bg-secondary"
-            }`}
-          >
-            <Contrast className="size-4" />
-            Alto contraste
-          </button>
+          <AccessibilityMenu {...accessibility} />
         </div>
       </header>
 
@@ -251,7 +216,7 @@ function Index() {
                       key={s.texto}
                       type="button"
                       onClick={() => enviarSugestao(s)}
-                      className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-sm text-secondary-foreground transition-colors hover:bg-secondary"
+                      className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-sm text-secondary-foreground transition-colors hover:bg-secondary"
                     >
                       <Sprout className="size-3.5 text-leaf" />
                       {s.texto}
@@ -287,7 +252,7 @@ function Index() {
                     ) : null,
                   )}
                   {message.role === "assistant" && textoDaMensagem && (
-                    <BotaoOuvir texto={textoDaMensagem} />
+                    <BotaoOuvir texto={textoDaMensagem} velocidade={accessibility.settings.speed} />
                   )}
                 </MessageContent>
               </Message>

@@ -1,4 +1,5 @@
 import { createParser } from "eventsource-parser";
+import { normalizeSettings, speechDuration } from "./accessibility";
 
 export function decodePCM(pending: Uint8Array, incoming: Uint8Array) {
   const bytes = new Uint8Array(pending.length + incoming.length);
@@ -11,8 +12,9 @@ export function decodePCM(pending: Uint8Array, incoming: Uint8Array) {
   return { samples, pending: bytes.slice(usable) };
 }
 
-export async function streamSpeech(endpoint: string, text: string, signal?: AbortSignal): Promise<void> {
+export async function streamSpeech(endpoint: string, text: string, signal?: AbortSignal, speed = 1): Promise<void> {
   signal?.throwIfAborted();
+  const playbackRate = normalizeSettings({ speed }).speed;
   const context = new AudioContext({ sampleRate: 24000 });
   const sources = new Set<AudioBufferSourceNode>();
   let playhead = 0;
@@ -56,6 +58,7 @@ export async function streamSpeech(endpoint: string, text: string, signal?: Abor
         buffer.copyToChannel(decoded.samples, 0);
         const source = context.createBufferSource();
         source.buffer = buffer;
+        source.playbackRate.value = playbackRate;
         source.connect(context.destination);
         sources.add(source);
         playback = new Promise<void>((resolve) => {
@@ -67,7 +70,7 @@ export async function streamSpeech(endpoint: string, text: string, signal?: Abor
         // Device startup can clip audio scheduled exactly at currentTime.
         playhead = Math.max(playhead, context.currentTime + 0.05);
         source.start(playhead);
-        playhead += buffer.duration;
+        playhead += speechDuration(buffer.duration, playbackRate);
       },
     });
     const reader = response.body.pipeThrough(new TextDecoderStream()).getReader();

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Contrast, Minus, Plus, RotateCcw, X } from "lucide-react";
+import { Contrast, RotateCcw, X } from "lucide-react";
+import { Slider } from "@/components/ui/slider";
 import { IconeAcessibilidade } from "@/components/icons/acessibilidade";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -48,13 +49,9 @@ export function AccessibilityMenu({ settings, update }: ReturnType<typeof useAcc
           <h2 className="font-semibold">Acessibilidade</h2>
           <Button variant="ghost" size="icon" className="min-h-11 min-w-11" aria-label="Fechar menu de acessibilidade" onClick={() => setOpen(false)}><X /></Button>
         </div>
-        <section aria-labelledby="text-size-label" className="space-y-2">
-          <h3 id="text-size-label" className="text-sm font-medium">Tamanho da fonte</h3>
-          <div className="flex items-center justify-between gap-3">
-            <Button variant="outline" size="icon" className="min-h-11 min-w-11" aria-label="Diminuir tamanho da fonte" disabled={settings.size <= 80} onClick={() => update({ size: settings.size - 10 })}><Minus /></Button>
-            <output aria-live="polite" className="text-sm tabular-nums">{settings.size}%</output>
-            <Button variant="outline" size="icon" className="min-h-11 min-w-11" aria-label="Aumentar tamanho da fonte" disabled={settings.size >= 200} onClick={() => update({ size: settings.size + 10 })}><Plus /></Button>
-          </div>
+        <section className="space-y-3">
+          <div className="flex justify-between text-sm font-medium"><h3 id="text-size-label">Tamanho da fonte</h3><output aria-live="polite" className="tabular-nums">{settings.size}%</output></div>
+          <Slider aria-labelledby="text-size-label" min={80} max={200} step={10} value={[settings.size]} onValueChange={([size = 100]) => update({ size })} />
         </section>
         <div className="space-y-2">
           <label id="font-label" className="text-sm font-medium">Fonte</label>
@@ -67,13 +64,9 @@ export function AccessibilityMenu({ settings, update }: ReturnType<typeof useAcc
           <label htmlFor="contrast-switch" className="flex items-center gap-2 text-sm font-medium"><Contrast className="size-4" />Alto contraste</label>
           <Switch id="contrast-switch" checked={settings.contrast} onCheckedChange={(contrast) => update({ contrast })} />
         </div>
-        <section aria-labelledby="speech-speed-label" className="space-y-2">
-          <h3 id="speech-speed-label" className="text-sm font-medium">Velocidade da leitura</h3>
-          <div className="flex items-center justify-between gap-3">
-            <Button variant="outline" size="icon" className="min-h-11 min-w-11" aria-label="Diminuir velocidade da leitura" disabled={settings.speed <= 0.5} onClick={() => update({ speed: Math.round((settings.speed - 0.1) * 10) / 10 })}><Minus /></Button>
-            <output aria-live="polite" className="text-sm tabular-nums">{settings.speed.toFixed(1).replace(".", ",")}×</output>
-            <Button variant="outline" size="icon" className="min-h-11 min-w-11" aria-label="Aumentar velocidade da leitura" disabled={settings.speed >= 2} onClick={() => update({ speed: Math.round((settings.speed + 0.1) * 10) / 10 })}><Plus /></Button>
-          </div>
+        <section className="space-y-3">
+          <div className="flex justify-between text-sm font-medium"><h3 id="speech-speed-label">Velocidade da leitura</h3><output aria-live="polite" className="tabular-nums">{settings.speed.toFixed(1).replace(".", ",")}×</output></div>
+          <Slider aria-labelledby="speech-speed-label" min={0.5} max={2} step={0.1} value={[settings.speed]} onValueChange={([speed = 1]) => update({ speed: Math.round(speed * 10) / 10 })} />
         </section>
         <Button variant="ghost" className="min-h-11 w-full whitespace-normal" onClick={() => update(DEFAULT_SETTINGS)}><RotateCcw />Restaurar padrão</Button>
       </PopoverContent>

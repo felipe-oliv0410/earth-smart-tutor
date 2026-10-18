@@ -396,6 +396,7 @@ function createLiveVoice(options: LiveOptions) {
         release();
       };
     } catch (error) {
+      console.error("Voice startup failed", error instanceof Error ? { name: error.name, message: error.message } : { name: "UnknownError" });
       fail(error instanceof DOMException && (error.name === "NotAllowedError" || error.name === "PermissionDeniedError") ? "Permita o uso do microfone no navegador para iniciar o modo voz." : "Não foi possível abrir o microfone ou conectar a voz. Verifique a permissão e tente novamente.");
     }
   }

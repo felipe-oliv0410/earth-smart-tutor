@@ -129,24 +129,27 @@
 }
 
 .alto-contraste {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.15 0.02 155);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.15 0.02 155);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.15 0.02 155);
-  --primary: oklch(0.3 0.09 152);
-  --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.88 0.05 135);
-  --secondary-foreground: oklch(0.15 0.02 155);
-  --muted: oklch(0.92 0.02 120);
-  --muted-foreground: oklch(0.35 0.04 145);
-  --accent: oklch(0.7 0.15 82);
-  --accent-foreground: oklch(0.15 0.02 90);
-  --leaf: oklch(0.45 0.12 145);
-  --border: oklch(0.4 0.03 145);
-  --input: oklch(0.4 0.03 145);
-  --ring: oklch(0.3 0.09 152);
+  --background: #000000;
+  --foreground: #ffff00;
+  --card: #000000;
+  --card-foreground: #ffff00;
+  --popover: #000000;
+  --popover-foreground: #ffff00;
+  --primary: #ffff00;
+  --primary-foreground: #000000;
+  --secondary: #1f1f00;
+  --secondary-foreground: #ffff00;
+  --muted: #0d0d0d;
+  --muted-foreground: #ffff00;
+  --accent: #ffff00;
+  --accent-foreground: #000000;
+  --leaf: #ffff00;
+  --leaf-foreground: #000000;
+  --border: #ffff00;
+  --input: #ffff00;
+  --ring: #ffff00;
+  --destructive: #ff6b6b;
+  --destructive-foreground: #000000;
 }
 
 @layer base {

@@ -93,7 +93,7 @@ export function useLiveVoice(
         } else if (event.type === "app.playback.blocked" || event.type === "app.playback.resumed") {
           setCall((previous) => ({ ...previous, playbackBlocked: event.type === "app.playback.blocked" }));
         } else if (["app.error", "gateway.error", "error", "app.greeting.error"].includes(event.type)) {
-          setCall((previous) => ({ ...previous, error: event.error?.message ?? "Voice request failed." }));
+          setCall((previous) => ({ ...previous, error: event.error?.message ?? "Não foi possível concluir a solicitação de voz." }));
         }
         try {
           void Promise.resolve(latest.current.onEvent?.(event)).catch(() => {
@@ -220,16 +220,16 @@ function createLiveVoice(options: LiveOptions) {
   function reportUnexpectedClosure(reason?: string) {
     if (state === "stopping" || state === "closed") return;
     const messages: Record<string, string> = {
-      startup_timeout: "Voice startup timed out. Start a new call to retry.",
-      initial_heartbeat_timeout: "Voice media did not connect. Start a new call to retry.",
-      heartbeat_timeout: "Voice connection was lost. Start a new call to retry.",
-      gateway_shutdown: "The voice service restarted. Start a new call to reconnect.",
-      inactivity_timeout: "The voice call ended after inactivity.",
-      duration_limit: "The voice call reached its duration limit. Start a new call to continue.",
+      startup_timeout: "A abertura da voz demorou demais. Inicie uma nova conversa para tentar novamente.",
+      initial_heartbeat_timeout: "O áudio não conseguiu conectar. Inicie uma nova conversa para tentar novamente.",
+      heartbeat_timeout: "A conexão de voz foi perdida. Inicie uma nova conversa para tentar novamente.",
+      gateway_shutdown: "O serviço de voz reiniciou. Inicie uma nova conversa.",
+      inactivity_timeout: "A conversa por voz terminou por inatividade.",
+      duration_limit: "A conversa atingiu seu limite de duração. Inicie outra para continuar.",
     };
     options.onEvent({
       type: "app.error",
-      error: { message: messages[reason ?? ""] ?? "The voice call ended unexpectedly. Start a new call to retry." },
+      error: { message: messages[reason ?? ""] ?? "A conversa por voz terminou inesperadamente. Inicie outra para tentar novamente." },
     });
   }
 
@@ -239,14 +239,14 @@ function createLiveVoice(options: LiveOptions) {
 
   function pulse() {
     if (state !== "active") return;
-    if (Date.now() - lastAck >= 5000) return fail("Voice control connection lost");
-    if (Date.now() - lastHeartbeat >= 5000) return fail("Voice media connection lost");
+    if (Date.now() - lastAck >= 5000) return fail("A conexão do modo voz foi perdida.");
+    if (Date.now() - lastHeartbeat >= 5000) return fail("A conexão de áudio foi perdida.");
     if (!mediaReady()) return;
     try {
       send({ type: "gateway.heartbeat" });
       lastHeartbeat = Date.now();
     } catch {
-      fail("Voice control connection failed");
+      fail("Não foi possível manter a conexão do modo voz.");
     }
   }
 
@@ -273,7 +273,7 @@ function createLiveVoice(options: LiveOptions) {
     answerReceived = true;
     clearTimeout(deadline);
     deadline = setTimeout(
-      () => fail("Voice media did not connect within 12 seconds. Start a new call to retry."),
+      () => fail("O áudio não conectou a tempo. Inicie outra conversa para tentar novamente."),
       12_000,
     );
     await peer.setRemoteDescription({ type: "answer", sdp: event.transport.sdp });
@@ -327,8 +327,8 @@ function createLiveVoice(options: LiveOptions) {
         void resumePlayback();
       });
       connection.addEventListener("connectionstatechange", () => {
-        if (connection.connectionState === "failed") fail("Voice media connection failed. Start a new call to retry.");
-        else if (connection.connectionState === "closed") fail("Voice media connection closed");
+        if (connection.connectionState === "failed") fail("A conexão de áudio falhou. Inicie outra conversa para tentar novamente.");
+        else if (connection.connectionState === "closed") fail("A conexão de áudio foi encerrada.");
         else activate();
       });
       channel = connection.createDataChannel("oai-events");
@@ -340,10 +340,10 @@ function createLiveVoice(options: LiveOptions) {
             activate();
           }
         } catch {
-          fail("Invalid voice session event");
+          fail("O serviço enviou uma resposta de voz inválida.");
         }
       });
-      channel.addEventListener("error", () => fail("Voice media connection failed"));
+      channel.addEventListener("error", () => fail("A conexão de áudio falhou."));
       channel.addEventListener("close", stop);
       await connection.setLocalDescription(await connection.createOffer());
       if (!starting()) return;
@@ -352,7 +352,7 @@ function createLiveVoice(options: LiveOptions) {
       const sdp = connection.localDescription?.sdp;
       if (!sdp) throw new Error("Missing voice session offer");
       socket = new WebSocket(options.url);
-      deadline = setTimeout(() => fail("Voice session did not start"), 50_000);
+      deadline = setTimeout(() => fail("Não foi possível iniciar a sessão de voz."), 50_000);
       socket.onopen = () => {
         if (!starting()) return release();
         send({ type: "app.start", sdp, context: options.context });
@@ -361,7 +361,7 @@ function createLiveVoice(options: LiveOptions) {
         try {
           const event: LiveEvent = JSON.parse(data);
           if (event.type === "gateway.session.created") {
-            void applyAnswer(event).catch(() => fail("Voice media negotiation failed"));
+            void applyAnswer(event).catch(() => fail("Não foi possível conectar o áudio da conversa."));
           } else if (event.type === "session.started") {
             activate();
           } else if (event.type === "gateway.heartbeat.ack") {
@@ -385,13 +385,13 @@ function createLiveVoice(options: LiveOptions) {
           }
           options.onEvent(event);
         } catch {
-          fail("Invalid voice event");
+          fail("O serviço enviou uma resposta de voz inválida.");
         }
       };
       socket.onerror = () => fail("Não foi possível conectar o modo voz");
       socket.onclose = () => {
         if (state !== "stopping" && state !== "closed") {
-          options.onEvent({ type: "app.error", error: { message: "Voice control connection closed" } });
+          options.onEvent({ type: "app.error", error: { message: "A conexão do modo voz foi encerrada." } });
         }
         release();
       };

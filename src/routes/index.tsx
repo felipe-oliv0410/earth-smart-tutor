@@ -199,10 +199,10 @@ function Index() {
     <div className="flex h-dvh flex-col bg-background">
       <header className="border-b bg-card/80 backdrop-blur">
         <div className="mx-auto flex w-full max-w-3xl items-center gap-3 px-4 py-3">
-          <img src={logo} alt="ClimaTutor" className="size-10" />
+          <img src={logo} alt="Clima Tutor" className="size-10" />
           <div className="min-w-0">
             <h1 className="font-display text-xl font-semibold leading-tight text-foreground">
-              ClimaTutor
+              Clima Tutor
             </h1>
             <p className="text-xs text-muted-foreground">
               Seu tutor de IA sobre educação climática

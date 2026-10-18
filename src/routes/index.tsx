@@ -57,8 +57,6 @@ const SUGESTOES: Sugestao[] = [
     texto: "NDCs: das promessas à prática",
     modo: "ndcs",
   },
-  { texto: "O que são energias renováveis?" },
-  { texto: "Como posso reduzir minha pegada de carbono?" },
 ];
 
 export const Route = createFileRoute("/")({

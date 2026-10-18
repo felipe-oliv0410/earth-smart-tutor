@@ -37,11 +37,20 @@ import logo from "@/assets/logo.png";
 const TITULO = "ClimaTutor — Tutor de IA sobre Educação Climática";
 const DESCRICAO =
   "Converse com o ClimaTutor, um tutor de IA que ensina mudanças climáticas, sustentabilidade e soluções para estudantes do ensino médio.";
-const SUGESTOES = [
-  "O que é o efeito estufa?",
-  "Por que a Amazônia importa para o clima?",
-  "O que são energias renováveis?",
-  "Como posso reduzir minha pegada de carbono?",
+// Sugestões: sem "modo" enviam a pergunta como texto; com "modo" iniciam uma
+// conversa guiada pelo tutor (o prompt do modo fica no servidor, em api/chat.ts).
+type Sugestao = { texto: string; modo?: string };
+const SUGESTOES: Sugestao[] = [
+  {
+    texto: "Mentor de sensibilização climática",
+    modo: "sensibilizacao",
+  },
+  {
+    texto: "Consultor: minha escola mais sustentável",
+    modo: "escola",
+  },
+  { texto: "O que são energias renováveis?" },
+  { texto: "Como posso reduzir minha pegada de carbono?" },
 ];
 
 export const Route = createFileRoute("/")({

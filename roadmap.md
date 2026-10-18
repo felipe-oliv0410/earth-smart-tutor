@@ -5,6 +5,7 @@
 - [x] Verify settings, persistence, and mobile layout.
 
 # Live voice
-- [ ] Add persistent voice transport and tutor delegation.
-- [ ] Add Start/Stop voice controls to accessibility menu.
-- [ ] Verify conversation, interruptions, and cleanup.
+- [x] Add persistent voice transport and tutor delegation.
+- [x] Add Start/Stop voice controls to accessibility menu.
+- [x] Verify settings tests, mobile layout, real Gateway startup/final usage, and immediate microphone cleanup.
+- [ ] Verify audible conversation, spoken interruptions, and delegated answers in preview and published app — blocked by sandbox WebRTC media connectivity; publishing requires the user's request.

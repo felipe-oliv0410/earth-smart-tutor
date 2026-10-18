@@ -1,6 +1,9 @@
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
+@import "@fontsource/opendyslexic";
+@import "@fontsource/atkinson-hyperlegible";
+@import "@fontsource/lexend";
 
 @custom-variant dark (&:is(.dark *));
 

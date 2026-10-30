@@ -7,6 +7,7 @@ import {
   withLovableAiGatewayRunIdHeader,
 } from "@/lib/ai-gateway.server";
 
+import { createOpenAI } from "@ai-sdk/openai";
 import { tutorPrompt } from "@/lib/tutor-prompts.server";
 
 export const Route = createFileRoute("/api/chat")({
@@ -34,8 +35,13 @@ export const Route = createFileRoute("/api/chat")({
           initialRunId,
         );
 
+        // Com OPENAI_API_KEY, as respostas são cobradas direto na conta OpenAI.
+        const openaiKey = process.env["OPENAI_API_KEY"];
+        const model = openaiKey
+          ? createOpenAI({ apiKey: openaiKey }).responses("gpt-5.1")
+          : gateway.responses("openai/gpt-6-astra");
         const result = streamText({
-          model: gateway.responses("openai/gpt-6-astra"),
+          model,
           system: sistema,
           messages: modelMessages,
           abortSignal: request.signal,

@@ -38,7 +38,7 @@ export const Route = createFileRoute("/api/chat")({
         // Com OPENAI_API_KEY, as respostas são cobradas direto na conta OpenAI.
         const openaiKey = process.env["OPENAI_API_KEY"];
         const model = openaiKey
-          ? createOpenAI({ apiKey: openaiKey }).responses("gpt-5.1")
+          ? createOpenAI({ apiKey: openaiKey }).responses("gpt-5.2")
           : gateway.responses("openai/gpt-6-astra");
         const result = streamText({
           model,

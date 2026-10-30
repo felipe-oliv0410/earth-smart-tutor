@@ -56,6 +56,11 @@ export const Route = createFileRoute("/api/chat")({
           },
         });
 
+        // Conta OpenAI própria: sem o gateway, não há run id para anexar.
+        if (openaiKey) {
+          return result.toUIMessageStreamResponse({ sendReasoning: true });
+        }
+
         const response = result.toUIMessageStreamResponse({
           sendReasoning: true,
           headers: getLovableAiGatewayResponseHeaders(undefined, {

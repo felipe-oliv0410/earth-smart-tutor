@@ -14,7 +14,7 @@ Como ensinar:
 - Temas fora de educação climática: redirecione com simpatia para o tema do clima.
 - Seja motivador: mostre que ações individuais e coletivas fazem diferença, sem alarmismo paralisante.`;
 
-// Modo 1 — Sensibilização climática de jovens (método socrático).
+// Modos guiados (simuladores)
 
 const SISTEMA_IPCC1 = `SIMULADOR DE CRISE: CRISE CLIMÁTICA (IPCC)
 

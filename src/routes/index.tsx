@@ -45,22 +45,9 @@ const DESCRICAO =
 // conversa guiada pelo tutor (o prompt do modo fica no servidor, em api/chat.ts).
 type Sugestao = { texto: string; modo?: string };
 const SUGESTOES: Sugestao[] = [
-  {
-    texto: "Mentor de sensibilização climática",
-    modo: "sensibilizacao",
-  },
-  {
-    texto: "Consultor: minha escola mais sustentável",
-    modo: "escola",
-  },
-  {
-    texto: "Decifrando as COPs",
-    modo: "cops",
-  },
-  {
-    texto: "NDCs: das promessas à prática",
-    modo: "ndcs",
-  },
+  { texto: "Simulador de crise climática (IPCC) — versão 1", modo: "ipcc1" },
+  { texto: "Simulador de crise climática (IPCC) — versão 2", modo: "ipcc2" },
+  { texto: "Simulador de gestão escolar", modo: "gestao" },
 ];
 
 export const Route = createFileRoute("/")({

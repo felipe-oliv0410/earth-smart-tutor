@@ -3,7 +3,7 @@ import { strict as assert } from "node:assert";
 import { normalizeVoiceContext, voiceSeconds } from "./live-context";
 
 it("keeps the four guided tutor choices available for voice", () => {
-  for (const mode of ["sensibilizacao", "escola", "cops", "ndcs"]) assert.equal(normalizeVoiceContext({ mode }).mode, mode);
+  for (const mode of ["ipcc1", "ipcc2", "gestao"]) assert.equal(normalizeVoiceContext({ mode }).mode, mode);
   assert.equal(normalizeVoiceContext({ mode: "unknown" }).mode, undefined);
 });
 it("preserves natural voice speed preferences", () => {

@@ -2,7 +2,7 @@ import { Mic, MicOff, Phone, PhoneOff, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { useLiveVoice } from "@/hooks/use-live-voice";
 
-export function LiveVoiceControls({ call, seconds }: { call: ReturnType<typeof useLiveVoice>; seconds: number | null }) {
+export function LiveVoiceControls({ call }: { call: ReturnType<typeof useLiveVoice> }) {
   const active = call.status === "connecting" || call.status === "connected";
   const labels = { idle: "", connecting: "Conectando…", connected: "Conversa por voz ativa", stopping: "Encerrando…", closed: "Conversa encerrada" };
   return <section className="space-y-2" aria-label="Modo voz">
@@ -15,7 +15,6 @@ export function LiveVoiceControls({ call, seconds }: { call: ReturnType<typeof u
       {call.playbackBlocked && <Button variant="outline" className="min-h-11" onClick={call.resumePlayback}><Play />Ouvir tutor</Button>}
     </div>
     <p role="status" className="text-xs text-muted-foreground">{labels[call.status]}{call.muted && active ? " · Microfone silenciado" : ""}</p>
-    {seconds !== null && <p className="text-xs text-muted-foreground">Uso de voz: {seconds.toFixed(0)} segundos{call.status === "closed" && !call.finalized ? " · Total final não confirmado" : ""}</p>}
     {call.error && <p role="alert" className="text-sm text-destructive break-words">{call.error}</p>}
   </section>;
 }

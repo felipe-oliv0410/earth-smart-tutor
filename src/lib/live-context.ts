@@ -1,7 +1,7 @@
 export type VoiceContext = { mode?: string; speed: number; history: { role: "user" | "assistant"; text: string }[] };
 export function normalizeVoiceContext(value: unknown): VoiceContext {
   const data = value && typeof value === "object" ? value as Record<string, unknown> : {};
-  const mode = typeof data["mode"] === "string" && ["sensibilizacao", "escola", "cops", "ndcs"].includes(data["mode"]) ? data["mode"] : undefined;
+  const mode = typeof data["mode"] === "string" && ["ipcc1", "ipcc2", "gestao"].includes(data["mode"]) ? data["mode"] : undefined;
   const speed = typeof data["speed"] === "number" && Number.isFinite(data["speed"]) ? Math.min(2, Math.max(0.5, data["speed"])) : 1;
   const history: VoiceContext["history"] = [];
   if (Array.isArray(data["history"])) for (const item of data["history"].slice(-6)) {

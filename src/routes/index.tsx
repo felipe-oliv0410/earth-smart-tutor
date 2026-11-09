@@ -45,7 +45,7 @@ const DESCRICAO =
 // conversa guiada pelo tutor (o prompt do modo fica no servidor, em api/chat.ts).
 type Sugestao = { texto: string; modo?: string };
 const SUGESTOES: Sugestao[] = [
-  { texto: "Simulador de gestão escolar", modo: "gestao" },
+  { texto: "Cidade em miniatura", modo: "gestao" },
   { texto: "Simulador de gestão escolar", modo: "gestao2" },
 ];
 

@@ -46,7 +46,7 @@ const DESCRICAO =
 type Sugestao = { texto: string; modo?: string };
 const SUGESTOES: Sugestao[] = [
   { texto: "Simulador de gestão escolar", modo: "gestao" },
-  { texto: "Simulador de gestão escolar — versão 2", modo: "gestao2" },
+  { texto: "Simulador de gestão escolar", modo: "gestao2" },
 ];
 
 export const Route = createFileRoute("/")({
@@ -225,7 +225,7 @@ function Index() {
                 <div className="mt-2 flex flex-wrap justify-center gap-2">
                   {SUGESTOES.map((s) => (
                     <button
-                      key={s.texto}
+                      key={s.modo ?? s.texto}
                       type="button"
                       onClick={() => enviarSugestao(s)}
                       className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-sm text-secondary-foreground transition-colors hover:bg-secondary"

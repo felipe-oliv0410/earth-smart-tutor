@@ -10,6 +10,5 @@
 <!-- LOVABLE:END -->
 
 - Keep accessibility settings in one browser-side hook and menu; apply typography globally and migrate the legacy contrast preference to preserve returning visitors' choices.
-- Change AI speech speed by instructing the TTS model (not playbackRate), so the voice pitch stays natural.
 - Keep tutor prompts in a server-only shared module so text and live voice use the same pedagogical rules.
-- Live voice uses the shared persistent relay with SDK client delegation and a mounted browser hook/audio element; preserve heartbeat, immediate Stop, final usage draining, and same-origin validation to prevent orphaned paid calls.
+- Live voice connects the browser directly to OpenAI Realtime via WebRTC using a short-lived client secret minted by a same-origin server route with the project OpenAI key, so usage bills to that OpenAI account and no relay is needed.

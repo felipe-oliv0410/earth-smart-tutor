@@ -2,11 +2,10 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { useEffect, useRef, useState } from "react";
-import { streamSpeech } from "@/lib/voz-ia";
 import { AccessibilityMenu, useAccessibility } from "@/components/accessibility-menu";
 import { useLiveVoice } from "@/hooks/use-live-voice";
 import { LiveVoiceControls } from "@/components/live-voice-controls";
-import { normalizeVoiceContext, voiceSeconds } from "@/lib/live-context";
+import { normalizeVoiceContext } from "@/lib/live-context";
 import { Button } from "@/components/ui/button";
 import {
   Brain,
@@ -14,8 +13,6 @@ import {
   MicOff,
   RotateCcw,
   Sprout,
-  Volume2,
-  VolumeX,
 } from "lucide-react";
 import {
   Conversation,
@@ -114,41 +111,6 @@ function useVozParaTexto(aoTranscrever: (texto: string) => void) {
   return { suportado, ouvindo, alternar };
 }
 
-// Leitura com voz de IA (natural). A lógica fica em src/lib/voz-ia.ts e src/routes/api/voz.ts.
-function BotaoOuvir({ texto, velocidade }: { texto: string; velocidade: number }) {
-  const [falando, setFalando] = useState(false);
-  const controle = useRef<AbortController | null>(null);
-
-  useEffect(() => () => controle.current?.abort(), []);
-
-  const alternar = async () => {
-    if (falando) {
-      controle.current?.abort();
-      return;
-    }
-    controle.current = new AbortController();
-    setFalando(true);
-    try {
-      await streamSpeech("/api/voz", texto, controle.current.signal, velocidade);
-    } catch (e) {
-      if (!controle.current?.signal.aborted) console.error(e);
-    } finally {
-      setFalando(false);
-    }
-  };
-
-  return (
-    <button
-      type="button"
-      onClick={alternar}
-      aria-label={falando ? "Parar leitura em voz alta" : "Ouvir resposta em voz alta"}
-      className="mt-1 inline-flex w-fit items-center gap-1.5 rounded-md border border-border bg-card px-2.5 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-secondary hover:text-secondary-foreground"
-    >
-      {falando ? <VolumeX className="size-3.5" /> : <Volume2 className="size-3.5" />}
-      {falando ? "Parar leitura" : "Ouvir resposta"}
-    </button>
-  );
-}
 // --- Fim dos recursos de voz ---
 
 function Index() {
@@ -160,15 +122,12 @@ function Index() {
   const [modo, setModo] = useState<string | undefined>(undefined);
   const voz = useVozParaTexto((texto) => setInput((atual) => (atual ? `${atual} ${texto}` : texto)));
   const accessibility = useAccessibility();
-  const [seconds, setSeconds] = useState<number | null>(null);
   const [caption, setCaption] = useState("");
   const call = useLiveVoice({
     context: normalizeVoiceContext({ mode: modo, speed: accessibility.settings.speed, history: messages.map(message => ({ role: message.role, text: message.parts.filter(part => part.type === "text").map(part => part.text).join("\n") })) }),
     onEvent(event) {
-      if (event.type === "gateway.session.created") { setSeconds(15); setCaption(""); }
-      if (typeof event.usage?.seconds === "number" && Number.isFinite(event.usage.seconds)) setSeconds(voiceSeconds(event.usage.seconds));
-      if (event.type === "session.output_transcript.delta" && typeof event["delta"] === "string") setCaption(current => (current + event["delta"]).slice(-1600));
-      if (event.type === "session.input_transcript.delta") setCaption("");
+      if (event.type === "response.created") setCaption("");
+      if (event.type === "response.output_audio_transcript.delta" && typeof event["delta"] === "string") setCaption(current => (current + event["delta"]).slice(-1600));
     },
   });
   const voiceActive = call.status === "connecting" || call.status === "connected" || call.status === "stopping";
@@ -194,7 +153,7 @@ function Index() {
               Seu tutor de IA sobre educação climática
             </p>
           </div>
-          <AccessibilityMenu {...accessibility} voiceControls={<LiveVoiceControls call={call} seconds={seconds} />} />
+          <AccessibilityMenu {...accessibility} voiceControls={<LiveVoiceControls call={call} />} />
         </div>
       </header>
       <audio ref={call.audioRef} autoPlay className="hidden" />
@@ -240,10 +199,6 @@ function Index() {
           )}
 
           {messages.map((message) => {
-            const textoDaMensagem = message.parts
-              .filter((p) => p.type === "text")
-              .map((p) => p.text)
-              .join("\n");
             return (
               <Message key={message.id} from={message.role}>
                 <MessageContent>
@@ -262,9 +217,6 @@ function Index() {
                     ) : part.type === "text" ? (
                       <MessageResponse key={i}>{part.text}</MessageResponse>
                     ) : null,
-                  )}
-                  {message.role === "assistant" && textoDaMensagem && !voiceActive && (
-                    <BotaoOuvir texto={textoDaMensagem} velocidade={accessibility.settings.speed} />
                   )}
                 </MessageContent>
               </Message>

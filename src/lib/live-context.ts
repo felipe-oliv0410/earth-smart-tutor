@@ -9,4 +9,5 @@ export function normalizeVoiceContext(value: unknown): VoiceContext {
   }
   return { ...(mode ? { mode } : {}), speed, history };
 }
-export function voiceSeconds(seconds: number) { return Math.max(15, seconds); }
+// A OpenAI aceita velocidade de voz entre 0,25 e 1,5.
+export function realtimeSpeed(speed: number) { return Math.min(1.5, Math.max(0.25, speed)); }

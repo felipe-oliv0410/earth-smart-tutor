@@ -11,7 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
-import { Route as ApiVozRouteImport } from './routes/api/voz'
+import { Route as ApiRealtimeRouteImport } from './routes/api/realtime'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -23,40 +23,40 @@ const ApiChatRoute = ApiChatRouteImport.update({
   path: '/api/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiVozRoute = ApiVozRouteImport.update({
-  id: '/api/voz',
-  path: '/api/voz',
+const ApiRealtimeRoute = ApiRealtimeRouteImport.update({
+  id: '/api/realtime',
+  path: '/api/realtime',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/api/chat': typeof ApiChatRoute
-  '/api/voz': typeof ApiVozRoute
+  '/api/realtime': typeof ApiRealtimeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/api/chat': typeof ApiChatRoute
-  '/api/voz': typeof ApiVozRoute
+  '/api/realtime': typeof ApiRealtimeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/api/chat': typeof ApiChatRoute
-  '/api/voz': typeof ApiVozRoute
+  '/api/realtime': typeof ApiRealtimeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/chat' | '/api/voz'
+  fullPaths: '/' | '/api/chat' | '/api/realtime'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/chat' | '/api/voz'
-  id: '__root__' | '/' | '/api/chat' | '/api/voz'
+  to: '/' | '/api/chat' | '/api/realtime'
+  id: '__root__' | '/' | '/api/chat' | '/api/realtime'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ApiChatRoute: typeof ApiChatRoute
-  ApiVozRoute: typeof ApiVozRoute
+  ApiRealtimeRoute: typeof ApiRealtimeRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -75,11 +75,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiChatRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/voz': {
-      id: '/api/voz'
-      path: '/api/voz'
-      fullPath: '/api/voz'
-      preLoaderRoute: typeof ApiVozRouteImport
+    '/api/realtime': {
+      id: '/api/realtime'
+      path: '/api/realtime'
+      fullPath: '/api/realtime'
+      preLoaderRoute: typeof ApiRealtimeRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -88,7 +88,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ApiChatRoute: ApiChatRoute,
-  ApiVozRoute: ApiVozRoute,
+  ApiRealtimeRoute: ApiRealtimeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

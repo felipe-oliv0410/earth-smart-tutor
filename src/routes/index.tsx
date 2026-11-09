@@ -199,10 +199,6 @@ function Index() {
           )}
 
           {messages.map((message) => {
-            const textoDaMensagem = message.parts
-              .filter((p) => p.type === "text")
-              .map((p) => p.text)
-              .join("\n");
             return (
               <Message key={message.id} from={message.role}>
                 <MessageContent>
